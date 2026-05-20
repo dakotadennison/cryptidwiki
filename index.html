@@ -234,7 +234,10 @@ body::before {
 .fr-card-creature { font-family: var(--display); font-size: 14px; font-weight: 500; letter-spacing: 0.05em; color: var(--red); }
 .fr-card-date { font-size: 9px; letter-spacing: 0.1em; color: rgba(240,232,208,0.35); }
 .fr-card-location { font-size: 10px; color: rgba(240,232,208,0.45); margin-bottom: 0.75rem; }
-.fr-card-context { font-size: 12px; line-height: 1.7; color: rgba(240,232,208,0.65); font-family: var(--serif); margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.fr-card-context { font-size: 12px; line-height: 1.7; color: rgba(240,232,208,0.65); font-family: var(--serif); margin-bottom: 0.5rem; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; transition: all 0.2s; }
+.fr-card-context.expanded { display: block; -webkit-line-clamp: unset; }
+.fr-read-more { background: transparent; border: none; color: var(--red); font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; cursor: pointer; padding: 0 0 0.6rem 0; display: block; transition: opacity 0.15s; }
+.fr-read-more:hover { opacity: 0.7; }
 .fr-card-reporter { font-size: 9px; letter-spacing: 0.1em; color: rgba(240,232,208,0.25); }
 
 .fr-cta { border: 1px solid var(--border2); background: var(--bg2); }
@@ -523,11 +526,24 @@ function renderSightings() {
       + '<span class="fr-card-date">' + s.date + '</span>'
       + '</div>'
       + '<div class="fr-card-location">📍 ' + s.location + '</div>'
-      + '<p class="fr-card-context">' + s.context + '</p>'
+      + '<p class="fr-card-context" id="ctx-' + s.id + '">' + s.context + '</p>'
+      + '<button class="fr-read-more" onclick="toggleContext(' + s.id + ')">READ FULL REPORT ▾</button>'
       + '<div class="fr-card-reporter">FILED BY: ' + s.reporter + '</div>'
       + '</div>'
       + '</div>';
   }).join('');
+}
+
+function toggleContext(id) {
+  var ctx = document.getElementById('ctx-' + id);
+  var btn = ctx.nextElementSibling;
+  if (ctx.classList.contains('expanded')) {
+    ctx.classList.remove('expanded');
+    btn.textContent = 'READ FULL REPORT ▾';
+  } else {
+    ctx.classList.add('expanded');
+    btn.textContent = 'COLLAPSE ▴';
+  }
 }
 
 
