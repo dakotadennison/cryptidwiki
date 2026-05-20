@@ -479,105 +479,7 @@ body::before {
     </div>
   </div>
 
-  <div class="fr-grid">
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status pending">PENDING REVIEW</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">MOTHMAN</span>
-          <span class="fr-card-date">MAY 12, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Chicago, Illinois, USA</div>
-        <p class="fr-card-context">Witnessed a large winged figure hovering near the top of the Willis Tower at approximately 11:45pm. It did not move for several minutes before ascending vertically and disappearing. Three other people on the street saw it. No one had a good enough camera. The eyes were red and visible from at least 200 feet below.</p>
-        <div class="fr-card-reporter">FILED BY: anonymous_witness_4471</div>
-      </div>
-    </div>
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status verified">FIELD VERIFIED</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">SKINWALKER</span>
-          <span class="fr-card-date">APR 28, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Blanding, Utah, USA</div>
-        <p class="fr-card-context">Something ran alongside our truck on Route 191 for about half a mile. It was keeping pace at 60mph on two legs. When my headlights caught it directly it dropped to all fours and veered into the desert. My wife and I both saw it. We did not stop. The shape of the head was wrong for any animal I know.</p>
-        <div class="fr-card-reporter">FILED BY: desert_driver_utah</div>
-      </div>
-    </div>
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status pending">PENDING REVIEW</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">FLATWOODS MONSTER</span>
-          <span class="fr-card-date">MAY 1, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Braxton County, West Virginia, USA</div>
-        <p class="fr-card-context">Bright object came down over the hill behind my property around 9pm. Went to investigate and smelled something like sulfur and burning metal. Saw a figure in the treeline — tall, glowing, hovering slightly off the ground. Did not approach. Eyes were burning for two days afterward. This is not my first report from this area.</p>
-        <div class="fr-card-reporter">FILED BY: wv_skywatcher</div>
-      </div>
-    </div>
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status unverified">UNVERIFIED</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">KUCHISAKE-ONNA</span>
-          <span class="fr-card-date">APR 15, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Osaka, Japan</div>
-        <p class="fr-card-context">Walking home at 1am near Namba. A woman in a surgical mask stepped out of an alley and asked me something in Japanese I did not understand. My friend translated later — she had asked if she was beautiful. We ran. She was standing at the next intersection when we arrived there. We took a taxi the rest of the way.</p>
-        <div class="fr-card-reporter">FILED BY: foreign_exchange_2026</div>
-      </div>
-    </div>
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status verified">FIELD VERIFIED</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">WENDIGO</span>
-          <span class="fr-card-date">MAR 3, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Kenora, Ontario, Canada</div>
-        <p class="fr-card-context">Found tracks in the snow near the lake that started as wolf prints and became something else entirely — bipedal, each print nearly three feet across. The tracks went for about a mile then stopped at the ice edge. My dog refused to leave the truck the entire time. Temperature dropped about 15 degrees as we followed the trail.</p>
-        <div class="fr-card-reporter">FILED BY: northern_ontario_hunter</div>
-      </div>
-    </div>
-
-    <div class="fr-card">
-      <div class="fr-card-img-wrap">
-        <div class="fr-card-img-placeholder">📷</div>
-        <div class="fr-card-status pending">PENDING REVIEW</div>
-      </div>
-      <div class="fr-card-body">
-        <div class="fr-card-meta">
-          <span class="fr-card-creature">SHADOW PEOPLE</span>
-          <span class="fr-card-date">MAY 8, 2026</span>
-        </div>
-        <div class="fr-card-location">📍 Birmingham, Alabama, USA</div>
-        <p class="fr-card-context">Third time this month I have woken up at 3am to see a figure in a wide brimmed hat standing at the foot of my bed. It does not move. It does not speak. It watches. When I turn on the light it is gone. My roommate saw it last Tuesday without me telling her anything about my own experiences. I moved my bed to the center of the room. It still comes.</p>
-        <div class="fr-card-reporter">FILED BY: sleepless_in_birmingham</div>
-      </div>
-    </div>
-
-  </div>
+  <div class="fr-grid" id="sightings-grid"></div>
 
   <div class="fr-cta">
     <div class="fr-cta-inner">
@@ -598,8 +500,33 @@ body::before {
 </footer>
 
 <script src="creatures.js"></script>
+<script src="sightings.js"></script>
 <script>
-// creatures loaded from creatures.js
+// sightings loaded from sightings.js
+
+function renderSightings() {
+  var grid = document.getElementById('sightings-grid');
+  if (!grid || !sightings || !sightings.length) return;
+  var statusLabel = { pending: 'PENDING REVIEW', verified: 'FIELD VERIFIED', unverified: 'UNVERIFIED' };
+  grid.innerHTML = sightings.map(function(s) {
+    return '<div class="fr-card">'
+      + '<div class="fr-card-img-wrap">'
+      + '<div class="fr-card-img-placeholder">📷</div>'
+      + '<div class="fr-card-status ' + s.status + '">' + statusLabel[s.status] + '</div>'
+      + '</div>'
+      + '<div class="fr-card-body">'
+      + '<div class="fr-card-meta">'
+      + '<span class="fr-card-creature">' + s.creature + '</span>'
+      + '<span class="fr-card-date">' + s.date + '</span>'
+      + '</div>'
+      + '<div class="fr-card-location">📍 ' + s.location + '</div>'
+      + '<p class="fr-card-context">' + s.context + '</p>'
+      + '<div class="fr-card-reporter">FILED BY: ' + s.reporter + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 
 // ── STATE ──
 var state = { view:'grid', filter:'all', sort:'name', query:'' };
@@ -833,6 +760,7 @@ document.addEventListener('keydown', function(e){
 
 // ── INIT ──
 showView('grid');
+renderSightings();
 </script>
 </body>
 </html>
