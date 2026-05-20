@@ -66,7 +66,7 @@ var sightings = [
     location: "Kenora, Ontario, Canada",
     context: "Found tracks in the snow near the lake that started as wolf prints and became something else entirely — bipedal, each print nearly three feet across. The tracks went for about a mile then stopped at the ice edge. My dog refused to leave the truck the entire time. Temperature dropped about 15 degrees as we followed the trail.",
     reporter: "northern_ontario_hunter",
-    image: ""
+    image: "images/footprints.png"
   },
   {
     id: 6,
