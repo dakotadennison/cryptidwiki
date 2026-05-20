@@ -382,6 +382,7 @@ body::before {
     <button class="nav-tab" id="tab-list">LIST</button>
     <button class="nav-tab" id="tab-map">MAP</button>
     <button class="nav-tab" id="tab-rankings">RANKINGS</button>
+    <button class="nav-tab" id="tab-sightings">SIGHTINGS</button>
   </div>
   <span class="controls-label" style="margin-left:0.75rem">FILTER //</span>
   <div class="filter-pills-wrap" style="display:flex;gap:5px;flex-wrap:wrap;">
@@ -675,6 +676,9 @@ function showView(v) {
       el.style.display = 'none';
     }
   });
+  // deselect sightings tab when switching to another view
+  var st = document.getElementById('tab-sightings');
+  if (st) st.classList.remove('active');
   render();
 }
 
@@ -802,6 +806,11 @@ document.getElementById('tab-grid').addEventListener('click', function(){ showVi
 document.getElementById('tab-list').addEventListener('click', function(){ showView('list'); });
 document.getElementById('tab-map').addEventListener('click', function(){ showView('map'); });
 document.getElementById('tab-rankings').addEventListener('click', function(){ showView('rankings'); });
+document.getElementById('tab-sightings').addEventListener('click', function(){
+  document.querySelectorAll('.nav-tab').forEach(function(b){ b.classList.remove('active'); });
+  this.classList.add('active');
+  document.getElementById('field-reports').scrollIntoView({ behavior: 'smooth' });
+});
 
 document.querySelectorAll('.pill').forEach(function(btn){
   btn.addEventListener('click', function(){
