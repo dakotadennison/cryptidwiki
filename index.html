@@ -509,9 +509,12 @@ function renderSightings() {
   if (!grid || !sightings || !sightings.length) return;
   var statusLabel = { pending: 'PENDING REVIEW', verified: 'FIELD VERIFIED', unverified: 'UNVERIFIED' };
   grid.innerHTML = sightings.map(function(s) {
+    var imgHtml = s.image
+      ? '<img src="' + s.image + '" alt="' + s.creature + ' sighting photo" style="width:100%;height:100%;object-fit:cover;opacity:0.8;">'
+      : '<div class="fr-card-img-placeholder">📷</div>';
     return '<div class="fr-card">'
       + '<div class="fr-card-img-wrap">'
-      + '<div class="fr-card-img-placeholder">📷</div>'
+      + imgHtml
       + '<div class="fr-card-status ' + s.status + '">' + statusLabel[s.status] + '</div>'
       + '</div>'
       + '<div class="fr-card-body">'
