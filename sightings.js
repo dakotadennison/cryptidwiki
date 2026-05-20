@@ -26,7 +26,7 @@ var sightings = [
     location: "Chicago, Illinois, USA",
     context: "Witnessed a large winged figure hovering near the top of the Willis Tower at approximately 11:45pm. It did not move for several minutes before ascending vertically and disappearing. Three other people on the street saw it. No one had a good enough camera. The eyes were red and visible from at least 200 feet below.",
     reporter: "anonymous_witness_4471",
-    image: ""
+    image: "/cryptidwiki/images/mothman-test.png"
   },
   {
     id: 2,
