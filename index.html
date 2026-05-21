@@ -207,6 +207,10 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 /* EMPTY */
 .empty-state { text-align: center; padding: 4rem 2rem; color: rgba(240,232,208,0.28); font-size: 12px; grid-column: 1/-1; letter-spacing: 0.1em; }
 
+/* MOBILE CLOSE BAR */
+.mobile-close-bar { display: none; position: sticky; bottom: 0; background: var(--bg2); border-top: 1px solid var(--border2); padding: 0.75rem 1rem; z-index: 20; }
+.mobile-close-btn { width: 100%; padding: 12px; background: var(--bg3); border: 1px solid var(--border2); color: var(--paper); font-family: var(--mono); font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; }
+
 @media (max-width: 768px) {
   .header-top { display: none; }
   .header-stats { display: none; }
@@ -245,6 +249,8 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
   .rank-val { font-size: 15px; }
   .overlay { align-items: flex-end; }
   .detail-panel { width: 100vw; height: 92vh; border-left: none; border-top: 1px solid var(--border2); border-radius: 12px 12px 0 0; animation: slideUp 0.25s ease; }
+  .mobile-close-bar { display: flex; }
+  .detail-close-btn { display: none; }
   .detail-name { font-size: 26px; }
   .detail-emoji { font-size: 40px; }
   .detail-meters { grid-template-columns: 1fr; }
@@ -410,6 +416,9 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
       <button class="detail-close-btn" id="close-btn">✕ CLOSE FILE</button>
     </div>
     <div id="detail-content"></div>
+    <div class="mobile-close-bar">
+      <button class="mobile-close-btn" onclick="closeDetail()">✕ CLOSE FILE</button>
+    </div>
   </div>
 </div>
 
