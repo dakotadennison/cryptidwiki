@@ -242,6 +242,28 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 /* EMPTY */
 .empty-state { text-align: center; padding: 4rem 2rem; color: rgba(240,232,208,0.28); font-size: 12px; grid-column: 1/-1; letter-spacing: 0.1em; }
 
+/* DETAIL ACTIONS */
+.detail-actions { display: flex; gap: 8px; margin-top: 0.75rem; flex-wrap: wrap; }
+.detail-action-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; padding: 6px 14px; border: 1px solid var(--border2); background: transparent; color: var(--paper2); cursor: pointer; transition: all 0.15s; }
+.detail-action-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* CREATURE OF THE DAY */
+.cotd-wrap { border-bottom: 1px solid var(--border2); background: rgba(212,175,55,0.04); }
+.cotd-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; color: var(--gold); padding: 0.5rem 1.5rem 0; opacity: 0.7; }
+.cotd-content { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1.5rem 0.75rem; transition: background 0.15s; }
+.cotd-content:hover { background: rgba(212,175,55,0.06); }
+.cotd-emoji { font-size: 28px; flex-shrink: 0; }
+.cotd-info { flex: 1; }
+.cotd-name { font-family: var(--display); font-size: 16px; color: var(--paper); }
+.cotd-origin { font-size: 10px; color: var(--paper2); margin-top: 1px; }
+.cotd-threat { font-size: 10px; color: var(--paper3); margin-top: 3px; font-family: var(--mono); }
+.cotd-cta { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); flex-shrink: 0; }
+
+/* SHARE TOAST */
+.share-toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--bg2); border: 1px solid var(--gold); color: var(--gold); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; padding: 10px 24px; z-index: 2000; display: none; border-radius: 2px; }
+.share-toast.show { display: block; animation: toastIn 0.2s ease; }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(8px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+
 /* MOBILE CLOSE BAR */
 .mobile-close-bar { display: none; position: sticky; bottom: 0; background: var(--bg2); border-top: 1px solid var(--border2); padding: 0.75rem 1rem; z-index: 20; }
 .mobile-close-btn { width: 100%; padding: 12px; background: var(--bg3); border: 1px solid var(--border2); color: var(--paper); font-family: var(--mono); font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.1em; }
@@ -380,6 +402,11 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 </div>
 </div><!-- end sticky-wrap -->
 
+<!-- CREATURE OF THE DAY -->
+<div class="cotd-wrap" id="cotd-banner"></div>
+
+<div class="share-toast" id="share-toast">🔗 CREATURE FILE LINK COPIED</div>
+
 <section class="hero">
   <div class="hero-tag">// FIELD RESEARCH COMPENDIUM //</div>
   <h1 class="hero-title">
@@ -500,6 +527,21 @@ function openRandomCreature() {
   var randomCreature = creatures[Math.floor(Math.random() * creatures.length)];
   openDetail(randomCreature.id);
 }
+
+// Creature of the day
+showCreatureOfDay();
+
+// Handle shared creature URL hash
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.startsWith('#creature-')) {
+    var slug = hash.replace('#creature-', '');
+    var match = creatures.find(function(c){
+      return c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-') === slug;
+    });
+    if (match) openDetail(match.id);
+  }
+})();
 
 function threatBadge(t) {
   if (t >= 90) return ['CRITICAL','threat-critical'];
@@ -633,11 +675,70 @@ function renderRankings() {
 }
 
 function pad(n){ return String(n).padStart(4,'0'); }
+
+// ── VOTES ──
+function getVotes() {
+  try { return JSON.parse(localStorage.getItem('cw_votes') || '{}'); } catch(e) { return {}; }
+}
+function saveVotes(v) {
+  try { localStorage.setItem('cw_votes', JSON.stringify(v)); } catch(e) {}
+}
+function getVote(id) { return getVotes()[id] || 0; }
+function upvote(id) {
+  var v = getVotes();
+  v[id] = (v[id] || 0) + 1;
+  saveVotes(v);
+  document.getElementById('vote-count-'+id).textContent = v[id];
+  var btn = document.getElementById('vote-btn-'+id);
+  if (btn) { btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }
+}
+
+// ── SHARE ──
+function shareCreature(id, name) {
+  var slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  var url = window.location.origin + window.location.pathname + '#creature-' + slug;
+  var ta = document.createElement('textarea');
+  ta.value = url;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); showShareToast(); } catch(e) {}
+  document.body.removeChild(ta);
+  history.replaceState(null, '', '#creature-' + slug);
+}
+function showShareToast() {
+  var t = document.getElementById('share-toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ── CREATURE OF THE DAY ──
+function getCreatureOfDay() {
+  var day = Math.floor(Date.now() / 86400000);
+  return creatures[day % creatures.length];
+}
+function showCreatureOfDay() {
+  var c = getCreatureOfDay();
+  var banner = document.getElementById('cotd-banner');
+  if (!banner) return;
+  banner.innerHTML = '<div class="cotd-label">🌙 // CREATURE OF THE DAY //</div>'
+    + '<div class="cotd-content" onclick="openDetail('+c.id+')" style="cursor:pointer;">'
+    + '<span class="cotd-emoji">'+c.emoji+'</span>'
+    + '<div class="cotd-info">'
+    + '<div class="cotd-name">'+c.name+'</div>'
+    + '<div class="cotd-origin">'+c.origin+'</div>'
+    + '<div class="cotd-threat">Threat: <span style="color:'+threatColor(c.threat)+'">'+c.threat+'/100</span> &nbsp;•&nbsp; '+rarityLabel(c.rarity)+'</div>'
+    + '</div>'
+    + '<div class="cotd-cta">VIEW FILE →</div>'
+    + '</div>';
+}
+
 function openDetail(id) {
   var c = null;
   for (var i=0;i<creatures.length;i++){ if (creatures[i].id===id){ c=creatures[i]; break; } }
   if (!c) return;
   var tb = threatBadge(c.threat);
+  var votes = getVote(c.id);
   document.getElementById('detail-file-num').textContent = 'FILE #'+pad(c.id)+' — CLASSIFICATION: '+tb[0];
   document.getElementById('detail-content').innerHTML =
     '<div class="detail-banner">'
@@ -651,6 +752,10 @@ function openDetail(id) {
     +'<div><div class="detail-meta-label">RARITY</div><div class="detail-meta-val" style="color:var(--amber)">'+rarityLabel(c.rarity)+'</div></div>'
     +'</div>'
     +'<div class="detail-tags">'+tagHtml(c.tags)+'</div>'
+    +'<div class="detail-actions">'
+    +'<button class="detail-action-btn" id="vote-btn-'+c.id+'" onclick="upvote('+c.id+')" style="'+(votes>0?'color:var(--gold);border-color:var(--gold);':'')+'">⚡ FIELD VOTE <span id="vote-count-'+c.id+'">'+votes+'</span></button>'
+    +'<button class="detail-action-btn" onclick="shareCreature('+c.id+',\''+c.name.replace(/'/g,"\\'")+'\')" >🔗 SHARE FILE</button>'
+    +'</div>'
     +'</div>'
     +'<div class="detail-body">'
     +'<div class="detail-meters">'
