@@ -242,8 +242,15 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 /* EMPTY */
 .empty-state { text-align: center; padding: 4rem 2rem; color: rgba(240,232,208,0.28); font-size: 12px; grid-column: 1/-1; letter-spacing: 0.1em; }
 
+/* VOTE WIDGET */
+.vote-widget { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--border2); padding: 4px 10px; }
+.vote-btn { background: transparent; border: none; cursor: pointer; font-size: 12px; color: var(--paper3); padding: 2px 4px; transition: color 0.12s; line-height: 1; }
+.vote-btn.up:hover { color: var(--gold); }
+.vote-btn.down:hover { color: var(--red); }
+.vote-score { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--paper2); min-width: 24px; text-align: center; }
+
 /* DETAIL ACTIONS */
-.detail-actions { display: flex; gap: 8px; margin-top: 0.75rem; flex-wrap: wrap; }
+.detail-actions { display: flex; gap: 8px; margin-top: 0.75rem; flex-wrap: wrap; align-items: center; }
 .detail-action-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; padding: 6px 14px; border: 1px solid var(--border2); background: transparent; color: var(--paper2); cursor: pointer; transition: all 0.15s; }
 .detail-action-btn:hover { border-color: var(--gold); color: var(--gold); }
 
@@ -676,21 +683,57 @@ function renderRankings() {
 
 function pad(n){ return String(n).padStart(4,'0'); }
 
-// ── VOTES ──
-function getVotes() {
-  try { return JSON.parse(localStorage.getItem('cw_votes') || '{}'); } catch(e) { return {}; }
+// ── GLOBAL VOTES ──
+var voteCache = {};
+var userVotes = {};
+try { userVotes = JSON.parse(localStorage.getItem('cw_uservotes') || '{}'); } catch(e) {}
+
+function saveUserVotes() {
+  try { localStorage.setItem('cw_uservotes', JSON.stringify(userVotes)); } catch(e) {}
 }
-function saveVotes(v) {
-  try { localStorage.setItem('cw_votes', JSON.stringify(v)); } catch(e) {}
+
+function fetchVotes(id, callback) {
+  if (voteCache[id] !== undefined) { callback(voteCache[id]); return; }
+  fetch('https://api.countapi.xyz/get/cryptidwiki/' + id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ voteCache[id] = d.value || 0; callback(voteCache[id]); })
+    .catch(function(){ voteCache[id] = 0; callback(0); });
 }
-function getVote(id) { return getVotes()[id] || 0; }
-function upvote(id) {
-  var v = getVotes();
-  v[id] = (v[id] || 0) + 1;
-  saveVotes(v);
-  document.getElementById('vote-count-'+id).textContent = v[id];
-  var btn = document.getElementById('vote-btn-'+id);
-  if (btn) { btn.style.color = 'var(--gold)'; btn.style.borderColor = 'var(--gold)'; }
+
+function castVote(id, dir) {
+  var prev = userVotes[id] || 0;
+  // Toggle off if same direction
+  if (prev === dir) {
+    userVotes[id] = 0;
+    saveUserVotes();
+    // Reverse the vote
+    fetch('https://api.countapi.xyz/hit/cryptidwiki/' + id + '?amount=' + (dir * -1))
+      .then(function(r){ return r.json(); })
+      .then(function(d){ voteCache[id] = d.value; updateVoteUI(id); });
+    return;
+  }
+  // Remove previous vote if switching direction
+  var adjust = dir;
+  if (prev !== 0) adjust = dir * 2; // switching direction counts double
+  userVotes[id] = dir;
+  saveUserVotes();
+  fetch('https://api.countapi.xyz/hit/cryptidwiki/' + id + '?amount=' + adjust)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ voteCache[id] = d.value; updateVoteUI(id); });
+}
+
+function updateVoteUI(id) {
+  var score = voteCache[id] || 0;
+  var userDir = userVotes[id] || 0;
+  var scoreEl = document.getElementById('vote-score-' + id);
+  var upEl = document.getElementById('vote-up-' + id);
+  var downEl = document.getElementById('vote-down-' + id);
+  if (scoreEl) {
+    scoreEl.textContent = score;
+    scoreEl.style.color = score > 0 ? 'var(--gold)' : score < 0 ? 'var(--red)' : 'var(--paper2)';
+  }
+  if (upEl) upEl.style.color = userDir === 1 ? 'var(--gold)' : 'var(--paper3)';
+  if (downEl) downEl.style.color = userDir === -1 ? 'var(--red)' : 'var(--paper3)';
 }
 
 // ── SHARE ──
@@ -738,7 +781,6 @@ function openDetail(id) {
   for (var i=0;i<creatures.length;i++){ if (creatures[i].id===id){ c=creatures[i]; break; } }
   if (!c) return;
   var tb = threatBadge(c.threat);
-  var votes = getVote(c.id);
   document.getElementById('detail-file-num').textContent = 'FILE #'+pad(c.id)+' — CLASSIFICATION: '+tb[0];
   document.getElementById('detail-content').innerHTML =
     '<div class="detail-banner">'
@@ -753,7 +795,11 @@ function openDetail(id) {
     +'</div>'
     +'<div class="detail-tags">'+tagHtml(c.tags)+'</div>'
     +'<div class="detail-actions">'
-    +'<button class="detail-action-btn" id="vote-btn-'+c.id+'" onclick="upvote('+c.id+')" style="'+(votes>0?'color:var(--gold);border-color:var(--gold);':'')+'">⚡ FIELD VOTE <span id="vote-count-'+c.id+'">'+votes+'</span></button>'
+    +'<div class="vote-widget">'
+    +'<button class="vote-btn up" id="vote-up-'+c.id+'" onclick="castVote('+c.id+',1)" title="Upvote">▲</button>'
+    +'<span class="vote-score" id="vote-score-'+c.id+'">—</span>'
+    +'<button class="vote-btn down" id="vote-down-'+c.id+'" onclick="castVote('+c.id+',-1)" title="Downvote">▼</button>'
+    +'</div>'
     +'<button class="detail-action-btn" onclick="shareCreature('+c.id+',\''+c.name.replace(/'/g,"\\'")+'\')" >🔗 SHARE FILE</button>'
     +'</div>'
     +'</div>'
@@ -768,6 +814,8 @@ function openDetail(id) {
     +'</div>';
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Fetch live vote count
+  fetchVotes(c.id, function(score){ voteCache[c.id] = score; updateVoteUI(c.id); });
 }
 function closeDetail() {
   document.getElementById('overlay').classList.remove('open');
