@@ -52,7 +52,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 .hero-desc { font-size: 12px; line-height: 1.8; color: rgba(240,232,208,0.55); max-width: 480px; }
 
 /* CONTROLS */
-.controls-bar { padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; background: var(--bg2); position: sticky; top: 91px; z-index: 90; }
+.controls-bar { padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; background: var(--bg2); position: sticky; top: 127px; z-index: 90; }
 .controls-label { font-size: 9px; letter-spacing: 0.18em; color: rgba(240,232,208,0.3); white-space: nowrap; }
 .nav-tabs-wrap { display: flex; gap: 5px; overflow-x: auto; flex-shrink: 0; }
 .nav-tab { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border: 1px solid transparent; cursor: pointer; background: transparent; color: rgba(240,232,208,0.42); font-family: var(--mono); transition: all 0.12s; white-space: nowrap; }
@@ -188,7 +188,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 .detail-abilities li::before { content: '▸'; position: absolute; left: 0; color: var(--red); font-size: 10px; top: 6px; }
 
 /* REPORTED.LIVE BANNER */
-.reported-banner { border-bottom: 1px solid var(--border2); border-top: none; background: rgba(192,57,43,0.06); padding: 0.85rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.reported-banner { border-bottom: 1px solid var(--border2); border-top: none; background: rgba(192,57,43,0.06); padding: 0.6rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; position: sticky; top: 91px; z-index: 99; }
 .rb-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: livepulse 1.5s ease-in-out infinite; flex-shrink: 0; }
 .rb-text { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .rb-tag { font-size: 9px; letter-spacing: 0.2em; color: var(--red); white-space: nowrap; }
@@ -217,7 +217,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
   .hero-tag { font-size: 8px; }
   .hero-title { font-size: 22px; }
   .hero-desc { font-size: 11px; }
-  .controls-bar { top: 58px; padding: 0.6rem 0.75rem; gap: 0.5rem; flex-direction: column; align-items: flex-start; }
+  .controls-bar { top: 96px; padding: 0.6rem 0.75rem; gap: 0.5rem; flex-direction: column; align-items: flex-start; }
   .controls-label { display: none; }
   .nav-tabs-wrap { width: 100%; }
   .nav-tab { flex: 1; text-align: center; padding: 5px 2px; font-size: 8px; letter-spacing: 0.05em; }
