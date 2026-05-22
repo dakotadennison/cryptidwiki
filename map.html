@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Entity Map — CryptidWiki</title>
+<meta name="description" content="Interactive world map of paranormal entities, cryptids, and supernatural creatures. Explore creatures by country and region.">
+<link rel="canonical" href="https://cryptidwiki.com/map">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060810;
+  --bg2: #0a0d18;
+  --bg3: #0e1220;
+  --bg4: #131928;
+  --gold: #f59e0b;
+  --gold2: rgba(245,158,11,0.1);
+  --red: #ef4444;
+  --red2: rgba(239,68,68,0.12);
+  --paper: #f1f5f9;
+  --paper2: rgba(241,245,249,0.7);
+  --paper3: rgba(241,245,249,0.35);
+  --paper4: rgba(241,245,249,0.12);
+  --border: rgba(241,245,249,0.06);
+  --border2: rgba(241,245,249,0.12);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --serif: 'DM Serif Display', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--bg); color: var(--paper); font-family: var(--sans); display: flex; flex-direction: column; }
+
+/* HEADER */
+.site-header { background: rgba(6,8,16,0.97); border-bottom: 1px solid var(--border2); padding: 0.6rem 1.5rem; display: flex; align-items: center; gap: 1rem; z-index: 100; flex-shrink: 0; }
+.logo { font-family: var(--serif); font-size: 20px; color: var(--paper); text-decoration: none; }
+.logo span { color: var(--gold); }
+.back-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--paper3); text-decoration: none; padding: 4px 10px; border: 1px solid var(--border2); transition: all 0.15s; }
+.back-btn:hover { color: var(--paper); border-color: var(--border2); }
+.header-stats { margin-left: auto; display: flex; gap: 1.5rem; align-items: center; }
+.hstat { text-align: center; }
+.hstat-num { font-family: var(--mono); font-size: 16px; font-weight: 500; line-height: 1; }
+.hstat-num.red { color: var(--red); }
+.hstat-num.gold { color: var(--gold); }
+.hstat-label { font-size: 8px; letter-spacing: 0.15em; color: var(--paper4); margin-top: 2px; }
+.header-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); background: var(--gold2); padding: 4px 10px; border: 1px solid rgba(245,158,11,0.2); }
+
+/* FILTERS */
+.filter-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0.4rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; flex-wrap: wrap; }
+.filter-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--paper4); margin-right: 4px; }
+.fbtn { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 3px 10px; border: 1px solid var(--border2); background: transparent; color: var(--paper3); cursor: pointer; transition: all 0.12s; }
+.fbtn:hover { color: var(--paper); border-color: var(--border2); }
+.fbtn.active { background: var(--red2); border-color: rgba(239,68,68,0.4); color: var(--red); }
+.fbtn.gold.active { background: var(--gold2); border-color: rgba(245,158,11,0.4); color: var(--gold); }
+
+/* MAIN LAYOUT */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* MAP */
+.map-wrap { flex: 1; position: relative; overflow: hidden; }
+#map-svg { width: 100%; height: 100%; }
+.country { fill: #0d1525; stroke: #1a2540; stroke-width: 0.3; cursor: pointer; transition: fill 0.2s; }
+.country:hover { stroke: rgba(245,158,11,0.6); stroke-width: 0.8; }
+.country.selected { stroke: var(--gold); stroke-width: 1.2; }
+.map-tooltip { position: absolute; background: rgba(6,8,16,0.95); border: 1px solid var(--border2); padding: 8px 14px; font-size: 11px; font-family: var(--sans); color: var(--paper); pointer-events: none; z-index: 50; display: none; border-radius: 2px; }
+.map-tooltip-name { font-weight: 600; margin-bottom: 2px; }
+.map-tooltip-count { font-size: 10px; color: var(--paper3); font-family: var(--mono); }
+.map-hint { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; color: var(--paper4); background: rgba(6,8,16,0.8); padding: 4px 14px; border: 1px solid var(--border); white-space: nowrap; }
+
+/* LEGEND */
+.map-legend { position: absolute; bottom: 1rem; left: 1rem; background: rgba(6,8,16,0.92); border: 1px solid var(--border2); padding: 0.6rem 0.75rem; }
+.legend-title { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em; color: var(--paper4); margin-bottom: 6px; }
+.legend-items { display: flex; gap: 8px; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 8px; color: var(--paper4); }
+.legend-swatch { width: 16px; height: 6px; }
+
+/* SIDE PANEL */
+.side-panel { width: 340px; background: var(--bg2); border-left: 1px solid var(--border2); display: flex; flex-direction: column; flex-shrink: 0; transition: transform 0.3s ease; overflow: hidden; }
+.side-panel.hidden { transform: translateX(100%); width: 0; }
+.panel-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.panel-country { font-family: var(--serif); font-size: 20px; margin-bottom: 2px; }
+.panel-count { font-family: var(--mono); font-size: 9px; color: var(--paper4); letter-spacing: 0.15em; }
+.panel-close { position: absolute; top: 0.75rem; right: 1rem; background: transparent; border: 1px solid var(--border2); color: var(--paper3); font-family: var(--mono); font-size: 9px; padding: 3px 8px; cursor: pointer; }
+.panel-close:hover { border-color: var(--red); color: var(--red); }
+.panel-list { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+.panel-empty { padding: 3rem 1.5rem; text-align: center; color: var(--paper4); font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; line-height: 1.8; }
+.panel-creature { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; text-decoration: none; }
+.panel-creature:hover { background: var(--bg3); }
+.panel-creature-photo { width: 48px; height: 48px; object-fit: cover; object-position: top; flex-shrink: 0; }
+.panel-creature-emoji { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--bg3); flex-shrink: 0; }
+.panel-creature-info { flex: 1; min-width: 0; }
+.panel-creature-name { font-size: 13px; font-weight: 600; color: var(--paper); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel-creature-type { font-family: var(--mono); font-size: 8px; color: var(--paper4); letter-spacing: 0.1em; margin-bottom: 3px; }
+.panel-creature-threat { display: flex; align-items: center; gap: 6px; }
+.panel-threat-bar { flex: 1; height: 2px; background: var(--border2); }
+.panel-threat-fill { height: 2px; }
+.panel-threat-val { font-family: var(--mono); font-size: 8px; color: var(--paper4); }
+
+/* NO SELECTION STATE */
+.map-welcome { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+.map-welcome-title { font-family: var(--serif); font-size: 28px; color: var(--paper); opacity: 0.15; margin-bottom: 0.5rem; }
+.map-welcome-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--paper4); opacity: 0.5; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .main { flex-direction: column; }
+  .side-panel { width: 100%; height: 50vh; border-left: none; border-top: 1px solid var(--border2); }
+  .side-panel.hidden { transform: translateY(100%); height: 0; }
+  .header-stats { display: none; }
+  .map-hint { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">Cryptid<span>Wiki</span></a>
+  <a href="/" class="back-btn">← DATABASE</a>
+  <div class="header-stats">
+    <div class="hstat"><div class="hstat-num red" id="stat-total">0</div><div class="hstat-label">ENTITIES</div></div>
+    <div class="hstat"><div class="hstat-num gold" id="stat-countries">0</div><div class="hstat-label">COUNTRIES</div></div>
+    <div class="hstat"><div class="hstat-num red" id="stat-critical">0</div><div class="hstat-label">CRITICAL THREAT</div></div>
+  </div>
+  <div class="header-tag">🗺 GLOBAL ENTITY MAP</div>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">TYPE:</span>
+  <button class="fbtn gold active" data-type="all" onclick="setFilter('all')">ALL</button>
+  <button class="fbtn" data-type="cryptid" onclick="setFilter('cryptid')">CRYPTID</button>
+  <button class="fbtn" data-type="beast" onclick="setFilter('beast')">BEAST</button>
+  <button class="fbtn" data-type="demon" onclick="setFilter('demon')">DEMON</button>
+  <button class="fbtn" data-type="spirit" onclick="setFilter('spirit')">SPIRIT</button>
+  <button class="fbtn" data-type="humanoid" onclick="setFilter('humanoid')">HUMANOID</button>
+</div>
+
+<div class="main">
+  <div class="map-wrap" id="map-wrap">
+    <svg id="map-svg"></svg>
+    <div class="map-tooltip" id="map-tooltip">
+      <div class="map-tooltip-name" id="tooltip-name"></div>
+      <div class="map-tooltip-count" id="tooltip-count"></div>
+    </div>
+    <div class="map-welcome" id="map-welcome">
+      <div class="map-welcome-title">GLOBAL ENTITY DISTRIBUTION</div>
+      <div class="map-welcome-sub">CLICK ANY COUNTRY TO VIEW ENTITIES</div>
+    </div>
+    <div class="map-hint">HOVER TO EXPLORE — CLICK TO VIEW ENTITIES</div>
+    <div class="map-legend">
+      <div class="legend-title">ENTITY DENSITY</div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-swatch" style="background:rgba(239,68,68,0.2)"></div>LOW</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:rgba(239,68,68,0.5)"></div>MED</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:rgba(239,68,68,0.85)"></div>HIGH</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel hidden" id="side-panel">
+    <div class="panel-header" style="position:relative;">
+      <div class="panel-country" id="panel-country">—</div>
+      <div class="panel-count" id="panel-count"></div>
+      <button class="panel-close" onclick="closePanel()">✕ CLOSE</button>
+    </div>
+    <div class="panel-list" id="panel-list"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="creatures.js"></script>
+<script>
+var activeFilter = 'all';
+var selectedCountry = null;
+
+// Country name to creature matching
+// Maps country names from TopoJSON to keywords in creature origin fields
+var countryKeywords = {
+  'United States of America': ['usa','united states','west virginia','louisiana','california','michigan','ohio','illinois','iowa','maryland','new jersey','wisconsin','washington','oregon','hawaii','appalachian','pacific northwest','pine barrens','nevada','vermont','new york','south carolina','georgia','alaska'],
+  'United Kingdom': ['england','britain','british','scotland','scottish','wales','welsh','orkney','cornwall','victorian','east anglia','london'],
+  'Japan': ['japan','japanese'],
+  'Ireland': ['ireland','irish'],
+  'China': ['china','chinese'],
+  'India': ['india','indian'],
+  'Philippines': ['philippines','filipino'],
+  'Malaysia': ['malaysia','malay'],
+  'Norway': ['norway','norwegian','norse','scandinavia','scandinavian'],
+  'Sweden': ['sweden','swedish'],
+  'Denmark': ['denmark','danish'],
+  'Germany': ['germany','german','bavaria','bavarian','alpine','alps'],
+  'France': ['france','french','cajun'],
+  'Romania': ['romania','romanian','transylvania'],
+  'Russia': ['russia','russian','slavic'],
+  'Greece': ['greece','greek','ancient greece','arcadia'],
+  'Egypt': ['egypt','egyptian'],
+  'Mexico': ['mexico','mexican'],
+  'Brazil': ['brazil','brazilian','amazon','amazonian'],
+  'Peru': ['peru','peruvian','andes','andean'],
+  'Bolivia': ['bolivia'],
+  'Colombia': ['colombia'],
+  'Canada': ['canada','canadian','inuit','arctic','northwest territories','british columbia','ontario'],
+  'Australia': ['australia','australian'],
+  'South Africa': ['south africa'],
+  'Kenya': ['kenya','east africa'],
+  'Uganda': ['uganda'],
+  'Ghana': ['ghana','west africa'],
+  'Nigeria': ['nigeria'],
+  'Democratic Republic of the Congo': ['congo','congolese'],
+  'Saudi Arabia': ['saudi','arabian peninsula','arabia'],
+  'Iran': ['iran','persia','persian'],
+  'Iraq': ['iraq','mesopotamia'],
+  'Israel': ['israel','biblical','ancient near east','hebrew'],
+  'Turkey': ['turkey','turkish','anatolia'],
+  'Indonesia': ['indonesia','indonesian'],
+  'Haiti': ['haiti','haitian'],
+  'Puerto Rico': ['puerto rico'],
+  'Nepal': ['nepal','himalaya','himalayas'],
+  'Tibet': ['tibet'],
+  'Tanzania': ['tanzania','zanzibar'],
+  'Cameroon': ['cameroon'],
+  'Togo': ['togo'],
+  'New Zealand': ['new zealand'],
+  'Papua New Guinea': ['papua','melanesia'],
+  'Greenland': ['greenland'],
+  'Iceland': ['iceland'],
+  'Finland': ['finland','finnish'],
+  'Poland': ['poland','polish','silesia'],
+};
+
+function getFilteredCreatures() {
+  if (activeFilter === 'all') return creatures;
+  return creatures.filter(function(c){ return c.type === activeFilter || (c.tags && c.tags.includes(activeFilter)); });
+}
+
+function getCreaturesForCountry(countryName) {
+  var keywords = countryKeywords[countryName];
+  if (!keywords) return [];
+  var filtered = getFilteredCreatures();
+  return filtered.filter(function(c) {
+    var origin = (c.origin || '').toLowerCase();
+    return keywords.some(function(kw){ return origin.includes(kw); });
+  });
+}
+
+function getCountryCounts() {
+  var counts = {};
+  Object.keys(countryKeywords).forEach(function(country) {
+    var list = getCreaturesForCountry(country);
+    if (list.length > 0) counts[country] = list.length;
+  });
+  return counts;
+}
+
+function threatColor(t) {
+  if (t >= 90) return '#ef4444';
+  if (t >= 70) return '#f59e0b';
+  if (t >= 50) return '#3b82f6';
+  return '#10b981';
+}
+
+function setFilter(type) {
+  activeFilter = type;
+  document.querySelectorAll('.fbtn').forEach(function(b){
+    b.classList.remove('active');
+    if (b.getAttribute('data-type') === type) b.classList.add('active');
+  });
+  updateMap();
+  if (selectedCountry) showPanel(selectedCountry);
+}
+
+function closePanel() {
+  selectedCountry = null;
+  document.getElementById('side-panel').classList.add('hidden');
+  document.getElementById('map-welcome').style.display = 'block';
+  d3.selectAll('.country').classed('selected', false);
+}
+
+function showPanel(countryName) {
+  selectedCountry = countryName;
+  var list = getCreaturesForCountry(countryName);
+  document.getElementById('panel-country').textContent = countryName;
+  document.getElementById('panel-count').textContent = list.length + ' ENTIT' + (list.length === 1 ? 'Y' : 'IES') + ' DOCUMENTED';
+  document.getElementById('map-welcome').style.display = 'none';
+
+  var panel = document.getElementById('side-panel');
+  panel.classList.remove('hidden');
+
+  if (!list.length) {
+    document.getElementById('panel-list').innerHTML = '<div class="panel-empty">NO DOCUMENTED ENTITIES<br>FOR THIS REGION<br><br>WITH CURRENT FILTER</div>';
+    return;
+  }
+
+  list.sort(function(a,b){ return b.threat - a.threat; });
+
+  document.getElementById('panel-list').innerHTML = list.map(function(c) {
+    var photoHtml = c.photo
+      ? '<img class="panel-creature-photo" src="'+c.photo+'" alt="'+c.name+'">'
+      : '<div class="panel-creature-emoji">'+c.emoji+'</div>';
+    return '<a class="panel-creature" href="/#creature-'+c.name.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'">'
+      + photoHtml
+      + '<div class="panel-creature-info">'
+      + '<div class="panel-creature-name">'+c.name+'</div>'
+      + '<div class="panel-creature-type">'+c.type.toUpperCase()+'</div>'
+      + '<div class="panel-creature-threat">'
+      + '<div class="panel-threat-bar"><div class="panel-threat-fill" style="width:'+c.threat+'%;background:'+threatColor(c.threat)+'"></div></div>'
+      + '<div class="panel-threat-val">'+c.threat+'</div>'
+      + '</div>'
+      + '</div>'
+      + '</a>';
+  }).join('');
+}
+
+// Update stats
+function updateStats() {
+  document.getElementById('stat-total').textContent = creatures.length;
+  var countrySet = new Set();
+  Object.keys(countryKeywords).forEach(function(c){
+    if (getCreaturesForCountry(c).length > 0) countrySet.add(c);
+  });
+  document.getElementById('stat-countries').textContent = countrySet.size;
+  document.getElementById('stat-critical').textContent = creatures.filter(function(c){ return c.threat >= 90; }).length;
+}
+
+// D3 Map
+var projection, path, svg;
+
+function initMap() {
+  svg = d3.select('#map-svg');
+  var wrap = document.getElementById('map-wrap');
+  var w = wrap.clientWidth, h = wrap.clientHeight;
+
+  projection = d3.geoNaturalEarth1()
+    .scale(w / 6.3)
+    .translate([w / 2, h / 2]);
+
+  path = d3.geoPath().projection(projection);
+
+  var tooltip = document.getElementById('map-tooltip');
+  var wrap = document.getElementById('map-wrap');
+
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(function(r){ return r.json(); })
+    .then(function(world) {
+      var countries = topojson.feature(world, world.objects.countries);
+      var countryNames = {};
+
+      // Load country names
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+        .then(function(){ })
+        .catch(function(){ });
+
+      // Use a simple ID to name mapping for major countries
+      var idToName = {
+        '840':'United States of America','826':'United Kingdom','392':'Japan','372':'Ireland',
+        '156':'China','356':'India','608':'Philippines','458':'Malaysia','578':'Norway',
+        '752':'Sweden','208':'Denmark','276':'Germany','250':'France','642':'Romania',
+        '643':'Russia','300':'Greece','818':'Egypt','484':'Mexico','076':'Brazil',
+        '604':'Peru','068':'Bolivia','170':'Colombia','124':'Canada','036':'Australia',
+        '710':'South Africa','404':'Kenya','800':'Uganda','288':'Ghana','566':'Nigeria',
+        '180':'Democratic Republic of the Congo','682':'Saudi Arabia','364':'Iran',
+        '368':'Iraq','376':'Israel','792':'Turkey','360':'Indonesia','332':'Haiti',
+        '630':'Puerto Rico','524':'Nepal','158':'Tibet','834':'Tanzania','120':'Cameroon',
+        '768':'Togo','554':'New Zealand','598':'Papua New Guinea','304':'Greenland',
+        '352':'Iceland','246':'Finland','616':'Poland'
+      };
+
+      svg.selectAll('.country')
+        .data(countries.features)
+        .enter().append('path')
+        .attr('class', 'country')
+        .attr('d', path)
+        .attr('data-id', function(d){ return d.id; })
+        .on('mousemove', function(event, d) {
+          var name = idToName[String(d.id).padStart(3,'0')] || null;
+          if (!name) return;
+          var list = getCreaturesForCountry(name);
+          var rect = wrap.getBoundingClientRect();
+          tooltip.style.display = 'block';
+          tooltip.style.left = (event.clientX - rect.left + 14) + 'px';
+          tooltip.style.top = (event.clientY - rect.top - 10) + 'px';
+          document.getElementById('tooltip-name').textContent = name;
+          document.getElementById('tooltip-count').textContent = list.length > 0
+            ? list.length + ' ENTIT' + (list.length===1?'Y':'IES') + ' DOCUMENTED'
+            : 'NO DOCUMENTED ENTITIES';
+        })
+        .on('mouseleave', function() { tooltip.style.display = 'none'; })
+        .on('click', function(event, d) {
+          var name = idToName[String(d.id).padStart(3,'0')] || null;
+          if (!name) return;
+          d3.selectAll('.country').classed('selected', false);
+          d3.select(this).classed('selected', true);
+          showPanel(name);
+        });
+
+      // Borders
+      svg.append('path')
+        .datum(topojson.mesh(world, world.objects.countries, function(a,b){ return a !== b; }))
+        .attr('fill','none')
+        .attr('stroke','#1a2540')
+        .attr('stroke-width', 0.3)
+        .attr('d', path);
+
+      updateMap();
+    });
+}
+
+function updateMap() {
+  var counts = getCountryCounts();
+  var max = Math.max(1, d3.max(Object.values(counts)) || 1);
+
+  // ID to name mapping
+  var idToName = {
+    '840':'United States of America','826':'United Kingdom','392':'Japan','372':'Ireland',
+    '156':'China','356':'India','608':'Philippines','458':'Malaysia','578':'Norway',
+    '752':'Sweden','208':'Denmark','276':'Germany','250':'France','642':'Romania',
+    '643':'Russia','300':'Greece','818':'Egypt','484':'Mexico','076':'Brazil',
+    '604':'Peru','068':'Bolivia','170':'Colombia','124':'Canada','036':'Australia',
+    '710':'South Africa','404':'Kenya','800':'Uganda','288':'Ghana','566':'Nigeria',
+    '180':'Democratic Republic of the Congo','682':'Saudi Arabia','364':'Iran',
+    '368':'Iraq','376':'Israel','792':'Turkey','360':'Indonesia','332':'Haiti',
+    '630':'Puerto Rico','524':'Nepal','158':'Tibet','834':'Tanzania','120':'Cameroon',
+    '768':'Togo','554':'New Zealand','598':'Papua New Guinea','304':'Greenland',
+    '352':'Iceland','246':'Finland','616':'Poland'
+  };
+
+  d3.selectAll('.country').attr('fill', function(d) {
+    var name = idToName[String(d.id).padStart(3,'0')];
+    if (!name) return '#0d1525';
+    var count = counts[name] || 0;
+    if (count === 0) return '#0d1525';
+    var intensity = count / max;
+    if (intensity < 0.25) return 'rgba(239,68,68,0.25)';
+    if (intensity < 0.5) return 'rgba(239,68,68,0.45)';
+    if (intensity < 0.75) return 'rgba(239,68,68,0.65)';
+    return 'rgba(239,68,68,0.88)';
+  });
+}
+
+// Init
+updateStats();
+initMap();
+</script>
+</body>
+</html>
