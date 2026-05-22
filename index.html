@@ -201,7 +201,17 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 .detail-close-btn { background: transparent; border: 1px solid var(--border2); color: var(--paper); font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; padding: 4px 12px; cursor: pointer; transition: border-color 0.13s; }
 .detail-close-btn:hover { border-color: var(--red); color: var(--red); }
 .detail-banner { padding: 1.8rem 1.5rem 1.4rem; border-bottom: 1px solid var(--border); position: relative; }
-.detail-photo { width: 100%; max-height: 340px; object-fit: cover; object-position: top; display: block; border-bottom: 1px solid var(--border); }
+.detail-photo { width: 100%; max-height: 340px; object-fit: cover; object-position: top; display: block; border-bottom: 1px solid var(--border); cursor: zoom-in; transition: opacity 0.15s; }
+.detail-photo:hover { opacity: 0.9; }
+
+/* LIGHTBOX */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 2000; align-items: center; justify-content: center; cursor: zoom-out; }
+.lightbox.open { display: flex; }
+.lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain; animation: lbIn 0.2s ease; }
+@keyframes lbIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+.lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; padding: 6px 16px; cursor: pointer; transition: all 0.15s; }
+.lightbox-close:hover { border-color: #fff; color: #fff; }
+.lightbox-hint { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: rgba(255,255,255,0.3); }
 .detail-stamp { position: absolute; top: 1.4rem; right: 1.4rem; font-family: var(--display); font-size: 13px; letter-spacing: 0.22em; color: rgba(192,57,43,0.48); border: 3px solid rgba(192,57,43,0.38); padding: 3px 11px; transform: rotate(-12deg); }
 .detail-emoji { font-size: 52px; margin-bottom: 0.9rem; display: block; line-height: 1; }
 .detail-name { font-family: var(--display); font-size: 34px; font-weight: 600; letter-spacing: 0.03em; margin-bottom: 3px; line-height: 1.1; }
@@ -407,6 +417,13 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
 <div class="cotd-wrap" id="cotd-banner"></div>
 
 <div class="share-toast" id="share-toast">🔗 CREATURE FILE LINK COPIED</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+  <button class="lightbox-close" onclick="closeLightbox()">✕ CLOSE</button>
+  <span class="lightbox-hint">CLICK ANYWHERE TO CLOSE</span>
+</div>
 
 <section class="hero">
   <div class="hero-tag">// FIELD RESEARCH COMPENDIUM //</div>
@@ -678,6 +695,18 @@ function renderRankings() {
 function pad(n){ return String(n).padStart(4,'0'); }
 
 
+// ── LIGHTBOX ──
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') { closeLightbox(); closeDetail(); closeForm(); }
+});
+
 // ── SHARE ──
 function shareCreature(id, name) {
   var slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
@@ -725,7 +754,7 @@ function openDetail(id) {
   var tb = threatBadge(c.threat);
   document.getElementById('detail-file-num').textContent = 'FILE #'+pad(c.id)+' — CLASSIFICATION: '+tb[0];
   document.getElementById('detail-content').innerHTML =
-    (c.photo ? '<img class="detail-photo" src="'+c.photo+'" alt="'+c.name+'">' : '')
+    (c.photo ? '<img class="detail-photo" src="'+c.photo+'" alt="'+c.name+'" onclick="openLightbox(\''+c.photo+'\')" title="Click to expand">' : '')
     +'<div class="detail-banner">'
     +'<div class="detail-stamp">'+tb[0]+'</div>'
     +'<span class="detail-emoji">'+c.emoji+'</span>'
@@ -785,7 +814,6 @@ document.getElementById('main-search').addEventListener('input', function(){
 
 document.getElementById('close-btn').addEventListener('click', closeDetail);
 document.getElementById('overlay').addEventListener('click', function(e){ if (e.target === this) closeDetail(); });
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDetail(); });
 
 showView('grid');
 </script>
