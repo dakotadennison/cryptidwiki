@@ -225,7 +225,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     <div class="slot slot-1">
       <div class="slot-label">ENTITY ONE</div>
       <div class="slot-search-wrap">
-        <input class="slot-search" id="search1" placeholder="Search by name or alias..." autocomplete="off"
+        <input class="slot-search" id="search1" placeholder="Type any creature name..." autocomplete="off"
           oninput="filterCreatures(1)" onfocus="showDrop(1)" onblur="hideDrop(1)">
         <div class="slot-dropdown" id="drop1"></div>
       </div>
@@ -249,7 +249,7 @@ body::before { content: ''; position: fixed; inset: 0; background: repeating-lin
     <div class="slot slot-2">
       <div class="slot-label">ENTITY TWO</div>
       <div class="slot-search-wrap">
-        <input class="slot-search" id="search2" placeholder="Search by name or alias..." autocomplete="off"
+        <input class="slot-search" id="search2" placeholder="Type any creature name..." autocomplete="off"
           oninput="filterCreatures(2)" onfocus="showDrop(2)" onblur="hideDrop(2)">
         <div class="slot-dropdown" id="drop2"></div>
       </div>
@@ -359,6 +359,7 @@ function renderDisplay(slot) {
 function filterCreatures(slot) {
   var q = document.getElementById('search'+slot).value.toLowerCase();
   var drop = document.getElementById('drop'+slot);
+  if (!q) { drop.style.display = 'none'; return; }
   var list = creatures.filter(function(c){
     return c.name.toLowerCase().includes(q) || (c.aka && c.aka.toLowerCase().includes(q)) || (c.origin && c.origin.toLowerCase().includes(q));
   });
@@ -371,7 +372,10 @@ function filterCreatures(slot) {
   drop.style.display = list.length ? 'block' : 'none';
 }
 
-function showDrop(slot) { filterCreatures(slot); }
+function showDrop(slot) { 
+  var q = document.getElementById('search'+slot).value.toLowerCase();
+  if (q) filterCreatures(slot);
+}
 function hideDrop(slot) { setTimeout(function(){ document.getElementById('drop'+slot).style.display='none'; }, 150); }
 
 function selectCreature(slot, id) {
