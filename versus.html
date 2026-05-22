@@ -3,149 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creature vs Creature — CryptidWiki Field Encounter Simulator</title>
-<meta name="description" content="Simulate encounters between any two cryptids, monsters, and paranormal entities. Who would win — Mothman vs Kraken? Wendigo vs Leviathan? Find out on CryptidWiki.">
+<title>Creature vs Creature — CryptidWiki Encounter Simulator</title>
+<meta name="description" content="Simulate encounters between any two cryptids, monsters, and paranormal entities. Who would win — Mothman vs Kraken? Wendigo vs Leviathan?">
 <link rel="canonical" href="https://cryptidwiki.com/versus">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0e1a;
-  --bg2: #0d1220;
-  --bg3: #111829;
-  --bg4: #162035;
+  --bg: #060810;
+  --bg2: #0a0d18;
+  --bg3: #0e1220;
+  --bg4: #131928;
   --gold: #f59e0b;
-  --gold2: rgba(245,158,11,0.12);
+  --gold2: rgba(245,158,11,0.1);
+  --gold3: rgba(245,158,11,0.04);
   --red: #ef4444;
-  --red2: rgba(239,68,68,0.12);
+  --red2: rgba(239,68,68,0.15);
   --blue: #3b82f6;
-  --purple: #a855f7;
-  --green: #10b981;
   --paper: #f1f5f9;
-  --paper2: rgba(241,245,249,0.65);
+  --paper2: rgba(241,245,249,0.7);
   --paper3: rgba(241,245,249,0.35);
-  --border: rgba(241,245,249,0.08);
-  --border2: rgba(241,245,249,0.15);
+  --paper4: rgba(241,245,249,0.12);
+  --border: rgba(241,245,249,0.06);
+  --border2: rgba(241,245,249,0.12);
+  --border3: rgba(241,245,249,0.2);
   --mono: 'JetBrains Mono', monospace;
   --sans: 'Inter', sans-serif;
   --serif: 'DM Serif Display', serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--paper); font-family: var(--sans); min-height: 100vh; }
+body { background: var(--bg); color: var(--paper); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+
+/* SCANLINES OVERLAY */
+body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 999; }
 
 /* HEADER */
-.site-header { background: var(--bg2); border-bottom: 1px solid var(--border2); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; position: sticky; top: 0; z-index: 100; }
-.logo { font-family: var(--serif); font-size: 22px; color: var(--paper); text-decoration: none; }
+.site-header { background: rgba(6,8,16,0.95); border-bottom: 1px solid var(--border2); padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.logo { font-family: var(--serif); font-size: 22px; color: var(--paper); text-decoration: none; letter-spacing: 0.01em; }
 .logo span { color: var(--gold); }
-.back-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--paper3); text-decoration: none; padding: 5px 12px; border: 1px solid var(--border2); transition: all 0.12s; }
-.back-btn:hover { color: var(--paper); border-color: var(--border2); }
-.header-tag { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); background: var(--gold2); padding: 4px 10px; border: 1px solid rgba(245,158,11,0.2); }
+.back-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--paper3); text-decoration: none; padding: 5px 12px; border: 1px solid var(--border2); transition: all 0.15s; }
+.back-btn:hover { color: var(--paper); border-color: var(--border3); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+.header-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); background: var(--gold2); padding: 5px 12px; border: 1px solid rgba(245,158,11,0.2); }
 
 /* HERO */
-.hero { text-align: center; padding: 3rem 1.5rem 2rem; border-bottom: 1px solid var(--border); }
-.hero-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.3em; color: var(--gold); margin-bottom: 0.75rem; }
-.hero-title { font-family: var(--serif); font-size: 48px; line-height: 1; margin-bottom: 0.5rem; }
-.hero-title span { color: var(--red); }
-.hero-sub { font-size: 13px; color: var(--paper3); max-width: 500px; margin: 0 auto; line-height: 1.7; }
-
-/* MAIN */
-.main { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
+.hero { position: relative; text-align: center; padding: 4rem 1.5rem 3rem; overflow: hidden; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(239,68,68,0.08) 0%, transparent 70%); pointer-events: none; }
+.hero-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.4em; color: var(--paper3); margin-bottom: 1rem; }
+.hero-title { font-family: var(--serif); font-size: 72px; line-height: 0.95; margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+.hero-title .vs { color: var(--red); font-style: italic; position: relative; display: inline-block; }
+.hero-title .vs::before { content: ''; position: absolute; inset: -4px -8px; background: var(--red2); border: 1px solid rgba(239,68,68,0.25); }
+.hero-divider { display: flex; align-items: center; gap: 1rem; justify-content: center; margin-bottom: 1.25rem; }
+.hero-divider-line { width: 60px; height: 1px; background: var(--border2); }
+.hero-divider-dot { width: 4px; height: 4px; background: var(--gold); transform: rotate(45deg); }
+.hero-sub { font-size: 13px; color: var(--paper3); max-width: 480px; margin: 0 auto; line-height: 1.8; letter-spacing: 0.01em; }
 
 /* ARENA */
-.arena { display: grid; grid-template-columns: 1fr 100px 1fr; gap: 1rem; margin-bottom: 1.5rem; align-items: start; }
-.slot { background: var(--bg2); border: 1px solid var(--border2); padding: 1.25rem; }
-.slot-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--paper3); margin-bottom: 0.75rem; }
-.slot-search { width: 100%; background: var(--bg3); border: 1px solid var(--border2); color: var(--paper); font-family: var(--sans); font-size: 12px; padding: 8px 10px; outline: none; margin-bottom: 0; transition: border-color 0.12s; }
-.slot-search:focus { border-color: var(--gold); }
-.slot-search::placeholder { color: var(--paper3); }
-.slot-dropdown { background: var(--bg3); border: 1px solid var(--border2); border-top: none; max-height: 200px; overflow-y: auto; display: none; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
-.slot-option { padding: 8px 10px; font-size: 12px; cursor: pointer; color: var(--paper2); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); transition: all 0.1s; }
-.slot-option:hover { background: var(--gold2); color: var(--gold); }
+.arena-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 0; }
+.arena { display: grid; grid-template-columns: 1fr 120px 1fr; gap: 0; align-items: stretch; border: 1px solid var(--border2); }
+
+/* FIGHTER SLOT */
+.slot { background: var(--bg2); padding: 1.5rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+.slot::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--border3), transparent); }
+.slot-1::after { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%; background: linear-gradient(270deg, rgba(239,68,68,0.03), transparent); pointer-events: none; }
+.slot-2::after { content: ''; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(90deg, rgba(59,130,246,0.03), transparent); pointer-events: none; }
+.slot-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; color: var(--paper4); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.slot-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.slot-search-wrap { position: relative; margin-bottom: 1.25rem; }
+.slot-search { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-left: 2px solid var(--gold); color: var(--paper); font-family: var(--sans); font-size: 13px; padding: 10px 14px; outline: none; transition: all 0.15s; letter-spacing: 0.02em; }
+.slot-search:focus { border-color: var(--gold); background: var(--bg4); }
+.slot-search::placeholder { color: var(--paper4); }
+.slot-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg4); border: 1px solid var(--border2); border-top: none; max-height: 220px; overflow-y: auto; z-index: 50; display: none; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+.slot-option { padding: 9px 14px; font-size: 12px; cursor: pointer; color: var(--paper2); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); transition: all 0.1s; letter-spacing: 0.01em; }
+.slot-option:hover { background: var(--gold2); color: var(--gold); padding-left: 20px; }
 .slot-option:last-child { border-bottom: none; }
-.slot-empty { padding: 2.5rem 1rem; text-align: center; color: var(--paper3); font-size: 11px; letter-spacing: 0.1em; font-family: var(--mono); }
-.slot-creature { padding: 1rem 0 0; text-align: center; }
-.slot-creature-emoji { font-size: 52px; margin-bottom: 0.5rem; display: block; line-height: 1; }
-.slot-creature-name { font-family: var(--serif); font-size: 22px; margin-bottom: 2px; }
-.slot-creature-origin { font-size: 10px; color: var(--paper3); margin-bottom: 1rem; line-height: 1.4; }
-.slot-meter { margin-bottom: 6px; }
-.slot-meter-label { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.1em; color: var(--paper3); margin-bottom: 3px; font-family: var(--mono); }
-.slot-meter-bar { height: 3px; background: var(--border2); }
-.slot-meter-fill { height: 3px; transition: width 0.6s ease; }
-.slot-clear { margin-top: 0.75rem; width: 100%; background: transparent; border: 1px solid var(--border); color: var(--paper3); font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 5px; cursor: pointer; transition: all 0.12s; }
-.slot-clear:hover { border-color: var(--red); color: var(--red); }
+.slot-option-emoji { font-size: 16px; flex-shrink: 0; }
 
-/* VS DIVIDER */
-.vs-divider { display: flex; align-items: center; justify-content: center; padding-top: 3rem; }
-.vs-badge { font-family: var(--serif); font-size: 28px; color: var(--red); background: var(--red2); border: 1px solid rgba(239,68,68,0.3); width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+/* CREATURE CARD */
+.creature-card { flex: 1; display: flex; flex-direction: column; }
+.creature-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 3rem 1rem; }
+.creature-empty-icon { font-size: 32px; opacity: 0.2; }
+.creature-empty-text { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--paper4); text-align: center; }
+.creature-photo-wrap { position: relative; margin-bottom: 1rem; overflow: hidden; }
+.creature-photo { width: 100%; height: 220px; object-fit: cover; object-position: top; display: block; filter: saturate(0.8); transition: filter 0.3s; }
+.creature-photo:hover { filter: saturate(1); }
+.creature-photo-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, var(--bg2), transparent); pointer-events: none; }
+.creature-emoji-large { font-size: 72px; text-align: center; padding: 1.5rem; line-height: 1; }
+.creature-info { padding: 0 0 1rem; }
+.creature-name { font-family: var(--serif); font-size: 26px; line-height: 1.1; margin-bottom: 3px; }
+.creature-aka { font-size: 10px; color: var(--paper3); letter-spacing: 0.08em; margin-bottom: 0.75rem; font-style: italic; }
+.creature-origin { font-family: var(--mono); font-size: 9px; color: var(--paper4); letter-spacing: 0.12em; margin-bottom: 1rem; }
+.creature-meters { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+.creature-meter { }
+.creature-meter-top { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--paper4); letter-spacing: 0.1em; margin-bottom: 3px; }
+.creature-meter-bar { height: 2px; background: var(--border2); }
+.creature-meter-fill { height: 2px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.creature-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+.creature-tag { font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em; padding: 2px 8px; border: 1px solid var(--border2); color: var(--paper3); }
+.creature-clear { margin-top: auto; padding-top: 1rem; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--paper4); background: transparent; border: 1px solid var(--border); padding: 6px 0; cursor: pointer; width: 100%; transition: all 0.15s; }
+.creature-clear:hover { border-color: var(--red); color: var(--red); }
 
-/* SIMULATE BTN */
-.simulate-wrap { text-align: center; margin-bottom: 2rem; }
-.simulate-btn { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.2em; padding: 14px 48px; background: var(--gold); border: none; color: #0a0e1a; cursor: pointer; transition: all 0.15s; }
-.simulate-btn:hover { background: #d97706; transform: translateY(-1px); }
-.simulate-btn:disabled { background: var(--border2); color: var(--paper3); cursor: not-allowed; transform: none; }
-.simulate-hint { font-size: 10px; color: var(--paper3); margin-top: 0.5rem; font-family: var(--mono); letter-spacing: 0.05em; }
+/* VS CENTER */
+.vs-center { background: var(--bg3); border-left: 1px solid var(--border2); border-right: 1px solid var(--border2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; position: relative; }
+.vs-center::before { content: ''; position: absolute; top: 0; bottom: 0; width: 1px; background: linear-gradient(to bottom, transparent, var(--border2) 20%, var(--border2) 80%, transparent); }
+.vs-text { font-family: var(--serif); font-size: 32px; color: var(--red); letter-spacing: 0.05em; position: relative; z-index: 1; }
+.vs-glow { position: absolute; width: 80px; height: 80px; background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%); border-radius: 50%; }
+.vs-dots { display: flex; flex-direction: column; gap: 4px; }
+.vs-dot { width: 3px; height: 3px; background: var(--border2); border-radius: 50%; }
+
+/* SIMULATE */
+.simulate-section { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 0; }
+.simulate-btn { width: 100%; padding: 18px; background: var(--red); border: none; color: #fff; font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.25em; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+.simulate-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%); transform: translateX(-100%); transition: transform 0.4s; }
+.simulate-btn:hover::before { transform: translateX(100%); }
+.simulate-btn:hover { background: #dc2626; letter-spacing: 0.3em; }
+.simulate-btn:disabled { background: var(--bg4); color: var(--paper4); cursor: not-allowed; letter-spacing: 0.25em; }
+.simulate-btn:disabled::before { display: none; }
+.simulate-meta { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 0.75rem; }
+.simulate-meta-line { flex: 1; max-width: 100px; height: 1px; background: var(--border); }
+.simulate-meta-text { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--paper4); }
 
 /* LOADING */
-.loading { text-align: center; padding: 3rem; display: none; }
-.loading-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 1rem; }
-.loading-dot { width: 8px; height: 8px; background: var(--gold); animation: dotPulse 1.2s ease-in-out infinite; }
-.loading-dot:nth-child(2) { animation-delay: 0.2s; }
-.loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotPulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
-.loading-text { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--paper3); }
+.loading { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; display: none; }
+.loading-bar-wrap { width: 300px; height: 2px; background: var(--border2); margin: 0 auto 1.5rem; overflow: hidden; }
+.loading-bar { height: 2px; background: var(--red); width: 0%; animation: loadBar 3s ease-in-out infinite; }
+@keyframes loadBar { 0%{width:0%;margin-left:0;} 50%{width:80%;margin-left:0;} 100%{width:0%;margin-left:100%;} }
+.loading-text { font-family: var(--mono); font-size: 10px; letter-spacing: 0.25em; color: var(--paper3); }
 
 /* RESULT */
-.result { display: none; background: var(--bg2); border: 1px solid var(--border2); margin-bottom: 2rem; animation: resultIn 0.4s ease; }
-@keyframes resultIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-.result-header { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.result-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); }
-.result-share { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--paper3); background: transparent; border: 1px solid var(--border2); padding: 4px 12px; cursor: pointer; transition: all 0.12s; }
-.result-share:hover { border-color: var(--gold); color: var(--gold); }
-.result-winner { padding: 2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, rgba(245,158,11,0.06), transparent); }
-.result-winner-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.3em; color: var(--paper3); margin-bottom: 0.5rem; }
-.result-winner-emoji { font-size: 56px; display: block; margin-bottom: 0.5rem; line-height: 1; }
-.result-winner-name { font-family: var(--serif); font-size: 36px; color: var(--gold); margin-bottom: 0.25rem; }
-.result-winner-sub { font-size: 11px; color: var(--paper3); font-family: var(--mono); letter-spacing: 0.1em; line-height: 1.6; max-width: 600px; margin: 0 auto; }
+.result-section { max-width: 1100px; margin: 0 auto; padding: 1.5rem; display: none; }
+.result-box { border: 1px solid var(--border2); background: var(--bg2); animation: resultIn 0.5s ease; }
+@keyframes resultIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
 
 /* MATCHUP CARD */
-.matchup-card { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; border-bottom: 1px solid var(--border); }
-.matchup-fighter { display: flex; flex-direction: column; align-items: center; padding: 1.5rem 1rem; position: relative; }
-.matchup-fighter.winner { background: rgba(245,158,11,0.05); }
-.matchup-fighter.loser { opacity: 0.5; filter: grayscale(0.4); }
-.matchup-photo { width: 100%; max-height: 200px; object-fit: cover; object-position: top; display: block; margin-bottom: 0.75rem; }
-.matchup-emoji { font-size: 48px; margin-bottom: 0.5rem; line-height: 1; }
-.matchup-name { font-family: var(--serif); font-size: 16px; margin-bottom: 2px; text-align: center; }
-.matchup-type { font-size: 9px; letter-spacing: 0.15em; color: var(--paper3); font-family: var(--mono); }
-.matchup-crown { position: absolute; top: 0.75rem; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: 0.15em; color: var(--gold); font-family: var(--mono); background: var(--gold2); border: 1px solid rgba(245,158,11,0.2); padding: 2px 10px; white-space: nowrap; }
-.matchup-vs { display: flex; align-items: center; justify-content: center; padding: 1rem 0.5rem; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-.matchup-vs-text { font-family: var(--serif); font-size: 20px; color: var(--red); }
-.result-narrative { padding: 1.5rem; }
-.result-narrative-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--paper3); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
-.result-narrative-text { font-size: 14px; line-height: 1.9; color: var(--paper2); }
-.result-again { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.75rem; }
-.result-again-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; padding: 8px 18px; background: transparent; border: 1px solid var(--border2); color: var(--paper2); cursor: pointer; transition: all 0.12s; }
-.result-again-btn:hover { border-color: var(--gold); color: var(--gold); }
+.result-matchup { display: grid; grid-template-columns: 1fr auto 1fr; border-bottom: 1px solid var(--border2); }
+.result-fighter { display: flex; flex-direction: column; align-items: center; padding: 2rem 1.5rem; text-align: center; position: relative; transition: all 0.3s; }
+.result-fighter.winner { background: linear-gradient(to bottom, rgba(245,158,11,0.08), transparent); }
+.result-fighter.loser { opacity: 0.45; filter: grayscale(0.6); }
+.result-fighter-photo { width: 100%; max-height: 200px; object-fit: cover; object-position: top; margin-bottom: 1rem; border: 1px solid var(--border2); }
+.result-fighter-emoji { font-size: 64px; margin-bottom: 0.75rem; line-height: 1; }
+.result-fighter-name { font-family: var(--serif); font-size: 20px; margin-bottom: 3px; }
+.result-fighter-type { font-family: var(--mono); font-size: 9px; color: var(--paper4); letter-spacing: 0.15em; }
+.result-fighter-badge { position: absolute; top: 1rem; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--gold); background: rgba(6,8,16,0.9); border: 1px solid rgba(245,158,11,0.4); padding: 3px 12px; white-space: nowrap; }
+.result-vs-col { display: flex; align-items: center; justify-content: center; padding: 1rem; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+.result-vs-text { font-family: var(--serif); font-size: 22px; color: var(--paper4); }
+
+/* WINNER SECTION */
+.result-winner-section { padding: 2rem; text-align: center; border-bottom: 1px solid var(--border2); }
+.result-winner-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.35em; color: var(--paper4); margin-bottom: 0.5rem; }
+.result-winner-name { font-family: var(--serif); font-size: 42px; color: var(--gold); line-height: 1; margin-bottom: 0.75rem; }
+.result-winner-reason { font-size: 13px; color: var(--paper3); max-width: 560px; margin: 0 auto; line-height: 1.7; font-style: italic; }
+
+/* NARRATIVE */
+.result-narrative { padding: 2rem; border-bottom: 1px solid var(--border2); }
+.result-narrative-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.result-narrative-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.25em; color: var(--paper4); flex-shrink: 0; }
+.result-narrative-line { flex: 1; height: 1px; background: var(--border2); }
+.result-narrative-text { font-size: 14px; line-height: 2; color: var(--paper2); letter-spacing: 0.01em; min-height: 60px; }
+.cursor { display: inline-block; width: 2px; height: 14px; background: var(--gold); margin-left: 2px; animation: blink 0.7s step-end infinite; vertical-align: middle; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+/* RESULT ACTIONS */
+.result-actions { padding: 1.25rem 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.result-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; padding: 10px 20px; background: transparent; border: 1px solid var(--border2); color: var(--paper3); cursor: pointer; transition: all 0.15s; }
+.result-btn:hover { border-color: var(--gold); color: var(--gold); }
+.result-btn.primary { background: var(--red2); border-color: rgba(239,68,68,0.4); color: var(--red); }
+.result-btn.primary:hover { background: var(--red); color: #fff; border-color: var(--red); }
 
 /* TOAST */
-.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--bg3); border: 1px solid var(--gold); color: var(--gold); font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; padding: 10px 24px; z-index: 2000; display: none; }
+.toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--bg4); border: 1px solid var(--gold); color: var(--gold); font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; padding: 10px 24px; z-index: 2000; display: none; }
 .toast.show { display: block; animation: toastIn 0.2s ease; }
 @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(8px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
 
 /* FOOTER */
-.site-footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: 10px; color: var(--paper3); letter-spacing: 0.08em; font-family: var(--mono); }
+.site-footer { border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 9px; color: var(--paper4); letter-spacing: 0.15em; font-family: var(--mono); margin-top: 3rem; }
 .site-footer a { color: var(--gold); text-decoration: none; }
 
 /* MOBILE */
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .arena { grid-template-columns: 1fr; }
-  .vs-divider { padding: 0.5rem 0; }
-  .vs-badge { width: 50px; height: 50px; font-size: 22px; }
-  .hero-title { font-size: 32px; }
-  .simulate-btn { padding: 12px 32px; font-size: 11px; }
-  .result-winner-name { font-size: 26px; }
-  .matchup-name { font-size: 13px; }
-  .matchup-photo { max-height: 130px; }
-  .matchup-emoji { font-size: 32px; }
+  .vs-center { border: none; border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2); padding: 1rem; flex-direction: row; }
+  .vs-text { font-size: 24px; }
+  .hero-title { font-size: 44px; }
+  .result-matchup { grid-template-columns: 1fr auto 1fr; }
+  .result-fighter { padding: 1.25rem 0.75rem; }
+  .result-fighter-emoji { font-size: 44px; }
+  .result-fighter-name { font-size: 15px; }
+  .result-winner-name { font-size: 30px; }
+  .result-narrative { padding: 1.25rem; }
+  .result-actions { padding: 1rem 1.25rem; }
+  .simulate-section { padding: 1rem; }
+  .arena-wrap { padding: 1rem; }
 }
 </style>
 </head>
@@ -153,74 +201,101 @@ body { background: var(--bg); color: var(--paper); font-family: var(--sans); min
 
 <header class="site-header">
   <a href="/" class="logo">Cryptid<span>Wiki</span></a>
-  <a href="/" class="back-btn">← BACK TO DATABASE</a>
-  <div class="header-tag">⚡ ENCOUNTER SIMULATOR</div>
+  <a href="/" class="back-btn">← DATABASE</a>
+  <div class="header-right">
+    <div class="header-tag">⚡ ENCOUNTER SIMULATOR</div>
+  </div>
 </header>
 
 <div class="hero">
-  <div class="hero-tag">// CRYPTIDWIKI FIELD ENCOUNTER SIMULATOR //</div>
-  <div class="hero-title">CREATURE <span>VS</span> CREATURE</div>
-  <p class="hero-sub">Select any two entities from the database. The simulator analyzes their documented abilities, threat ratings, and lore to generate a unique encounter narrative.</p>
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">// CRYPTIDWIKI — FIELD ENCOUNTER SIMULATOR //</div>
+  <div class="hero-title">CREATURE <span class="vs">VS</span> CREATURE</div>
+  <div class="hero-divider">
+    <div class="hero-divider-line"></div>
+    <div class="hero-divider-dot"></div>
+    <div class="hero-divider-line"></div>
+  </div>
+  <p class="hero-sub">Select any two entities from the database. Each simulation generates a unique encounter narrative based on documented abilities and lore.</p>
 </div>
 
-<div class="main">
+<div class="arena-wrap">
   <div class="arena">
     <!-- SLOT 1 -->
-    <div class="slot">
-      <div class="slot-label">// ENTITY ONE //</div>
-      <input class="slot-search" id="search1" placeholder="Search creature..." autocomplete="off"
-        oninput="filterCreatures(1)" onfocus="showDrop(1)" onblur="hideDrop(1)">
-      <div class="slot-dropdown" id="drop1"></div>
-      <div id="display1"><div class="slot-empty">SELECT A CREATURE TO BEGIN</div></div>
+    <div class="slot slot-1">
+      <div class="slot-label">ENTITY ONE</div>
+      <div class="slot-search-wrap">
+        <input class="slot-search" id="search1" placeholder="Search by name or alias..." autocomplete="off"
+          oninput="filterCreatures(1)" onfocus="showDrop(1)" onblur="hideDrop(1)">
+        <div class="slot-dropdown" id="drop1"></div>
+      </div>
+      <div class="creature-card" id="display1">
+        <div class="creature-empty">
+          <div class="creature-empty-icon">👁</div>
+          <div class="creature-empty-text">SELECT AN ENTITY<br>TO BEGIN</div>
+        </div>
+      </div>
     </div>
 
-    <div class="vs-divider">
-      <div class="vs-badge">VS</div>
+    <!-- VS CENTER -->
+    <div class="vs-center">
+      <div class="vs-dots"><div class="vs-dot"></div><div class="vs-dot"></div><div class="vs-dot"></div></div>
+      <div class="vs-glow"></div>
+      <div class="vs-text">VS</div>
+      <div class="vs-dots"><div class="vs-dot"></div><div class="vs-dot"></div><div class="vs-dot"></div></div>
     </div>
 
     <!-- SLOT 2 -->
-    <div class="slot">
-      <div class="slot-label">// ENTITY TWO //</div>
-      <input class="slot-search" id="search2" placeholder="Search creature..." autocomplete="off"
-        oninput="filterCreatures(2)" onfocus="showDrop(2)" onblur="hideDrop(2)">
-      <div class="slot-dropdown" id="drop2"></div>
-      <div id="display2"><div class="slot-empty">SELECT A CREATURE TO BEGIN</div></div>
+    <div class="slot slot-2">
+      <div class="slot-label">ENTITY TWO</div>
+      <div class="slot-search-wrap">
+        <input class="slot-search" id="search2" placeholder="Search by name or alias..." autocomplete="off"
+          oninput="filterCreatures(2)" onfocus="showDrop(2)" onblur="hideDrop(2)">
+        <div class="slot-dropdown" id="drop2"></div>
+      </div>
+      <div class="creature-card" id="display2">
+        <div class="creature-empty">
+          <div class="creature-empty-icon">👁</div>
+          <div class="creature-empty-text">SELECT AN ENTITY<br>TO BEGIN</div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="simulate-wrap">
-    <button class="simulate-btn" id="sim-btn" onclick="simulate()" disabled>⚡ SIMULATE ENCOUNTER</button>
-    <div class="simulate-hint">Each simulation generates a unique narrative — run it again for a different outcome</div>
+<div class="simulate-section">
+  <button class="simulate-btn" id="sim-btn" onclick="simulate()" disabled>⚡ &nbsp; SIMULATE ENCOUNTER</button>
+  <div class="simulate-meta">
+    <div class="simulate-meta-line"></div>
+    <div class="simulate-meta-text">EACH SIMULATION GENERATES A UNIQUE OUTCOME — RUN AGAIN FOR A DIFFERENT RESULT</div>
+    <div class="simulate-meta-line"></div>
   </div>
+</div>
 
-  <div class="loading" id="loading">
-    <div class="loading-dots">
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
-    </div>
-    <div class="loading-text" id="loading-text">ANALYZING THREAT DATA...</div>
-  </div>
+<div class="loading" id="loading">
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-text" id="loading-text">ANALYZING THREAT DATA...</div>
+</div>
 
-  <div class="result" id="result">
-    <div class="result-header">
-      <span class="result-tag">// ENCOUNTER RESULT //</span>
-      <button class="result-share" onclick="shareResult()">🔗 SHARE RESULT</button>
-    </div>
-    <div class="matchup-card" id="matchup-card"></div>
-    <div class="result-winner">
-      <div class="result-winner-label">VICTOR</div>
-      <span class="result-winner-emoji" id="winner-emoji"></span>
+<div class="result-section" id="result-section">
+  <div class="result-box">
+    <div class="result-matchup" id="matchup-card"></div>
+    <div class="result-winner-section">
+      <div class="result-winner-eyebrow">VICTOR</div>
       <div class="result-winner-name" id="winner-name"></div>
-      <div class="result-winner-sub" id="winner-sub"></div>
+      <div class="result-winner-reason" id="winner-reason"></div>
     </div>
     <div class="result-narrative">
-      <div class="result-narrative-label">// FIELD ENCOUNTER REPORT //</div>
+      <div class="result-narrative-header">
+        <div class="result-narrative-label">FIELD ENCOUNTER REPORT</div>
+        <div class="result-narrative-line"></div>
+      </div>
       <div class="result-narrative-text" id="narrative"></div>
     </div>
-    <div class="result-again">
-      <button class="result-again-btn" onclick="simulate()">⚡ RUN AGAIN</button>
-      <button class="result-again-btn" onclick="resetAll()">↺ NEW MATCHUP</button>
+    <div class="result-actions">
+      <button class="result-btn primary" onclick="simulate()">⚡ RUN AGAIN</button>
+      <button class="result-btn" onclick="resetAll()">↺ NEW MATCHUP</button>
+      <button class="result-btn" onclick="shareResult()">🔗 SHARE RESULT</button>
     </div>
   </div>
 </div>
@@ -228,7 +303,7 @@ body { background: var(--bg); color: var(--paper); font-family: var(--sans); min
 <div class="toast" id="toast"></div>
 
 <footer class="site-footer">
-  <a href="/">CRYPTIDWIKI.COM</a> — PARANORMAL ENTITY DATABASE — ENCOUNTER SIMULATOR POWERED BY CLAUDE AI
+  <a href="/">CRYPTIDWIKI.COM</a> &nbsp;—&nbsp; PARANORMAL ENTITY DATABASE &nbsp;—&nbsp; ENCOUNTER SIMULATOR
 </footer>
 
 <script src="creatures.js"></script>
@@ -236,6 +311,7 @@ body { background: var(--bg); color: var(--paper); font-family: var(--sans); min
 var WORKER_URL = 'https://cryptidwiki-api.dakotadennison.workers.dev';
 var selected = [null, null];
 var currentResult = null;
+var typeTimer = null;
 
 var loadingMsgs = [
   'ANALYZING THREAT DATA...',
@@ -257,26 +333,40 @@ function threatColor(t) {
 function renderDisplay(slot) {
   var c = selected[slot-1];
   var el = document.getElementById('display'+slot);
-  if (!c) { el.innerHTML = '<div class="slot-empty">SELECT A CREATURE TO BEGIN</div>'; return; }
-  el.innerHTML = '<div class="slot-creature">'
-    +'<span class="slot-creature-emoji">'+c.emoji+'</span>'
-    +'<div class="slot-creature-name">'+c.name+'</div>'
-    +'<div class="slot-creature-origin">'+c.origin+'</div>'
-    +'<div class="slot-meter"><div class="slot-meter-label"><span>THREAT</span><span>'+c.threat+'/100</span></div>'
-    +'<div class="slot-meter-bar"><div class="slot-meter-fill" style="width:'+c.threat+'%;background:'+threatColor(c.threat)+'"></div></div></div>'
-    +'<div class="slot-meter"><div class="slot-meter-label"><span>RARITY</span><span>'+c.rarity+'/100</span></div>'
-    +'<div class="slot-meter-bar"><div class="slot-meter-fill" style="width:'+c.rarity+'%;background:#a855f7"></div></div></div>'
-    +'<button class="slot-clear" onclick="clearSlot('+slot+')">✕ CLEAR</button>'
-    +'</div>';
+  if (!c) {
+    el.innerHTML = '<div class="creature-empty"><div class="creature-empty-icon">👁</div><div class="creature-empty-text">SELECT AN ENTITY<br>TO BEGIN</div></div>';
+    return;
+  }
+  var photoHtml = c.photo
+    ? '<div class="creature-photo-wrap"><img class="creature-photo" src="'+c.photo+'" alt="'+c.name+'"><div class="creature-photo-overlay"></div></div>'
+    : '<div class="creature-emoji-large">'+c.emoji+'</div>';
+  var tags = (c.tags||[]).map(function(t){ return '<span class="creature-tag">'+t.toUpperCase()+'</span>'; }).join('');
+  el.innerHTML = photoHtml
+    +'<div class="creature-info">'
+    +'<div class="creature-name">'+c.name+'</div>'
+    +(c.aka ? '<div class="creature-aka">"'+c.aka+'"</div>' : '')
+    +'<div class="creature-origin">'+c.origin+'</div>'
+    +'<div class="creature-meters">'
+    +'<div class="creature-meter"><div class="creature-meter-top"><span>THREAT LEVEL</span><span>'+c.threat+'/100</span></div><div class="creature-meter-bar"><div class="creature-meter-fill" style="width:'+c.threat+'%;background:'+threatColor(c.threat)+'"></div></div></div>'
+    +'<div class="creature-meter"><div class="creature-meter-top"><span>RARITY</span><span>'+c.rarity+'/100</span></div><div class="creature-meter-bar"><div class="creature-meter-fill" style="width:'+c.rarity+'%;background:#a855f7"></div></div></div>'
+    +'</div>'
+    +'<div class="creature-tags">'+tags+'</div>'
+    +'</div>'
+    +'<button class="creature-clear" onclick="clearSlot('+slot+')">✕ CLEAR SELECTION</button>';
   checkBtn();
 }
 
 function filterCreatures(slot) {
   var q = document.getElementById('search'+slot).value.toLowerCase();
   var drop = document.getElementById('drop'+slot);
-  var list = creatures.filter(function(c){ return c.name.toLowerCase().includes(q) || (c.aka && c.aka.toLowerCase().includes(q)); });
+  var list = creatures.filter(function(c){
+    return c.name.toLowerCase().includes(q) || (c.aka && c.aka.toLowerCase().includes(q)) || (c.origin && c.origin.toLowerCase().includes(q));
+  });
   drop.innerHTML = list.slice(0,10).map(function(c){
-    return '<div class="slot-option" onmousedown="selectCreature('+slot+','+c.id+')">'+c.emoji+' <span>'+c.name+'</span></div>';
+    return '<div class="slot-option" onmousedown="selectCreature('+slot+','+c.id+')">'
+      +'<span class="slot-option-emoji">'+c.emoji+'</span>'
+      +'<span>'+c.name+'</span>'
+      +'</div>';
   }).join('');
   drop.style.display = list.length ? 'block' : 'none';
 }
@@ -296,9 +386,8 @@ function selectCreature(slot, id) {
 
 function clearSlot(slot) {
   selected[slot-1] = null;
-  document.getElementById('search'+slot).value = '';
   renderDisplay(slot);
-  document.getElementById('result').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
   checkBtn();
 }
 
@@ -311,8 +400,42 @@ function resetAll() {
   renderDisplay(1); renderDisplay(2);
   document.getElementById('search1').value = '';
   document.getElementById('search2').value = '';
-  document.getElementById('result').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
   checkBtn();
+}
+
+function buildFighter(c, isWinner) {
+  var cls = 'result-fighter ' + (isWinner ? 'winner' : 'loser');
+  var badge = isWinner ? '<div class="result-fighter-badge">⚡ VICTOR</div>' : '';
+  var photoHtml = c.photo
+    ? '<img class="result-fighter-photo" src="'+c.photo+'" alt="'+c.name+'">'
+    : '<div class="result-fighter-emoji">'+c.emoji+'</div>';
+  return '<div class="'+cls+'">'
+    + badge
+    + photoHtml
+    + '<div class="result-fighter-name">'+c.name+'</div>'
+    + '<div class="result-fighter-type">'+c.type.toUpperCase()+' • THREAT '+c.threat+'</div>'
+    + '</div>';
+}
+
+function typeNarrative(text) {
+  var el = document.getElementById('narrative');
+  el.innerHTML = '';
+  if (typeTimer) clearInterval(typeTimer);
+  var cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  el.appendChild(cursor);
+  var words = text.split(' ');
+  var i = 0;
+  typeTimer = setInterval(function() {
+    if (i < words.length) {
+      el.insertBefore(document.createTextNode((i===0?'':' ')+words[i]), cursor);
+      i++;
+    } else {
+      clearInterval(typeTimer);
+      cursor.remove();
+    }
+  }, 35);
 }
 
 function simulate() {
@@ -320,9 +443,10 @@ function simulate() {
   if (!c1 || !c2) return;
   if (c1.id === c2.id) { showToast('SELECT TWO DIFFERENT CREATURES'); return; }
 
-  document.getElementById('result').style.display = 'none';
+  document.getElementById('result-section').style.display = 'none';
   document.getElementById('loading').style.display = 'block';
   document.getElementById('sim-btn').disabled = true;
+  if (typeTimer) clearInterval(typeTimer);
 
   var i = 0;
   var interval = setInterval(function(){
@@ -330,24 +454,20 @@ function simulate() {
     i++;
   }, 700);
 
-  var prompt = 'You are the CryptidWiki Field Encounter Simulator — a dramatic paranormal field analyst. Two supernatural entities are about to clash in a life-or-death encounter.\n\nCREATURE 1: ' + c1.name + '\nOrigin: ' + c1.origin + '\nThreat Level: ' + c1.threat + '/100\nType: ' + c1.type + '\nAbilities: ' + (c1.abilities||[]).join(', ') + '\nLore: ' + (c1.lore||'').substring(0,300) + '\n\nCREATURE 2: ' + c2.name + '\nOrigin: ' + c2.origin + '\nThreat Level: ' + c2.threat + '/100\nType: ' + c2.type + '\nAbilities: ' + (c2.abilities||[]).join(', ') + '\nLore: ' + (c2.lore||'').substring(0,300) + '\n\nWrite a dramatic 200-250 word encounter narrative with buildup, escalation, and a decisive conclusion. Reference specific abilities from both creatures. Make it feel like a field report from a paranormal investigator who witnessed the encounter. Then declare a winner with a one-sentence explanation of why they won.\n\nRespond ONLY in this exact JSON format:\n{"winner":"exact creature name","reason":"one sentence why they won","narrative":"200-250 word dramatic narrative"}';
+  var prompt = 'You are the CryptidWiki Field Encounter Simulator — a paranormal field analyst writing classified encounter reports. Two supernatural entities are about to clash.\n\nENTITY 1: '+c1.name+'\nOrigin: '+c1.origin+'\nThreat Level: '+c1.threat+'/100\nType: '+c1.type+'\nAbilities: '+(c1.abilities||[]).join(', ')+'\nLore: '+(c1.lore||'').substring(0,300)+'\n\nENTITY 2: '+c2.name+'\nOrigin: '+c2.origin+'\nThreat Level: '+c2.threat+'/100\nType: '+c2.type+'\nAbilities: '+(c2.abilities||[]).join(', ')+'\nLore: '+(c2.lore||'').substring(0,300)+'\n\nWrite a gripping 220-260 word encounter narrative. Start with scene setting — where and when this encounter takes place. Build tension as the two entities detect each other. Escalate to confrontation with specific abilities from both creatures being used. Deliver a decisive, satisfying conclusion with a clear winner. Write it like a classified field report — urgent, specific, visceral.\n\nRespond ONLY in this exact JSON format with no markdown:\n{"winner":"exact creature name","reason":"one powerful sentence explaining why they won","narrative":"your 220-260 word narrative"}';
 
   fetch(WORKER_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
   })
-  .then(function(r){ 
-    console.log('HTTP status:', r.status);
-    return r.json(); 
-  })
+  .then(function(r){ return r.json(); })
   .then(function(data) {
-    console.log('Full response:', JSON.stringify(data));
     clearInterval(interval);
     document.getElementById('loading').style.display = 'none';
     if (!data.content || !data.content[0] || !data.content[0].text) {
-      console.error('Bad response structure:', JSON.stringify(data));
-      showToast('SIMULATION FAILED — CHECK CONSOLE');
+      console.error('Bad response:', JSON.stringify(data));
+      showToast('SIMULATION FAILED — TRY AGAIN');
       document.getElementById('sim-btn').disabled = false;
       return;
     }
@@ -355,7 +475,7 @@ function simulate() {
     var clean = text.replace(/```json|```/g,'').trim();
     var result = JSON.parse(clean);
     currentResult = result;
-    // Flexible winner matching
+
     var winnerName = result.winner || '';
     var winner = c1;
     if (winnerName.toLowerCase().includes(c2.name.toLowerCase()) || c2.name.toLowerCase().includes(winnerName.toLowerCase())) {
@@ -363,20 +483,18 @@ function simulate() {
     }
     var loser = winner === c1 ? c2 : c1;
 
-    // Build matchup card with photos
-    var mc = document.getElementById('matchup-card');
-    mc.innerHTML = buildFighter(c1, c1===winner) + '<div class="matchup-vs"><div class="matchup-vs-text">VS</div></div>' + buildFighter(c2, c2===winner);
+    document.getElementById('matchup-card').innerHTML =
+      buildFighter(c1, c1===winner)
+      +'<div class="result-vs-col"><div class="result-vs-text">VS</div></div>'
+      +buildFighter(c2, c2===winner);
 
-    document.getElementById('winner-emoji').textContent = winner.emoji;
     document.getElementById('winner-name').textContent = result.winner.toUpperCase();
-    document.getElementById('winner-sub').textContent = result.reason;
+    document.getElementById('winner-reason').textContent = result.reason;
     document.getElementById('narrative').textContent = '';
-    document.getElementById('result').style.display = 'block';
-    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     document.getElementById('sim-btn').disabled = false;
-
-    // Type out narrative
-    typeNarrative(result.narrative);
+    setTimeout(function(){ typeNarrative(result.narrative); }, 400);
   })
   .catch(function(err) {
     clearInterval(interval);
@@ -387,40 +505,11 @@ function simulate() {
   });
 }
 
-function buildFighter(c, isWinner) {
-  var cls = isWinner ? 'matchup-fighter winner' : 'matchup-fighter loser';
-  var crown = isWinner ? '<div class="matchup-crown">⚡ VICTOR</div>' : '';
-  var photo = c.photo ? '<img class="matchup-photo" src="'+c.photo+'" alt="'+c.name+'">' : '<div class="matchup-emoji">'+c.emoji+'</div>';
-  return '<div class="'+cls+'">'
-    + crown
-    + photo
-    + '<div class="matchup-name">'+c.name+'</div>'
-    + '<div class="matchup-type">'+c.type.toUpperCase()+' — THREAT '+c.threat+'</div>'
-    + '</div>';
-}
-
-var typeTimer = null;
-function typeNarrative(text) {
-  var el = document.getElementById('narrative');
-  el.textContent = '';
-  if (typeTimer) clearInterval(typeTimer);
-  var i = 0;
-  var words = text.split(' ');
-  typeTimer = setInterval(function() {
-    if (i < words.length) {
-      el.textContent += (i === 0 ? '' : ' ') + words[i];
-      i++;
-    } else {
-      clearInterval(typeTimer);
-    }
-  }, 40);
-}
-
 function shareResult() {
   if (!selected[0] || !selected[1] || !currentResult) return;
-  var text = 'CryptidWiki Battle: ' + selected[0].name + ' vs ' + selected[1].name + ' — Winner: ' + currentResult.winner + '. ' + currentResult.reason + ' | cryptidwiki.com/versus';
+  var text = 'CryptidWiki Battle: '+selected[0].name+' vs '+selected[1].name+' — Winner: '+currentResult.winner+'. '+currentResult.reason+' | cryptidwiki.com/versus';
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function(){ showToast('🔗 RESULT COPIED TO CLIPBOARD'); });
+    navigator.clipboard.writeText(text).then(function(){ showToast('🔗 RESULT COPIED'); });
   }
 }
 
